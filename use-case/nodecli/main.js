@@ -1,15 +1,27 @@
 import * as util from "node:util";
 import * as fs from "node:fs/promises";
+import { marked } from "marked";
 
-const { positionals } = util.parseArgs({
-    allowPositionals: true
+const {
+    values,
+    positionals
+} = util.parseArgs({
+    allowPositionals: true,
+    options: {
+        gfm: {
+            type: "boolean",
+            default: false,
+        }
+    }
 });
 const filePath = positionals[0];
-// ファイルを非同期で読み込む
 fs.readFile(filePath, { encoding: "utf8" }).then(file => {
-    console.log(file);
+    const html = marked.parse(file, {
+        // gfmフラグのパース結果をオプションとして渡す
+        gfm: values.gfm
+    });
+    console.log(html);
 }).catch(err => {
     console.error(err.message);
-    // 終了ステータス 1（一般的なエラー）としてプロセスを終了する
     process.exit(1);
 });
